@@ -1,0 +1,44 @@
+version: "3"
+services:
+  jaeger:
+    image: jaegertracing/all-in-one@sha256:710ddea40c84ce01acdb9fdb4c0a76ac11990e425a666968a3ae360dabc4e15f
+    ports:
+      - "16686:16686"
+  zipkin:
+    image: openzipkin/zipkin@sha256:1ae0572be3d26fd9ab3fd2da5e8feaa0ca0078dbc31e2ddfb881b1a56bc332b1
+    ports:
+      - "9411:9411"
+  otel-collector:
+    image: otel/opentelemetry-collector@sha256:6f1c53a611091402f0403b628554621591effc7cf88e94be1f9141be007d11c7
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    depends_on:
+      - jaeger
+      - zipkin
+  otel-agent:
+    image: otel/opentelemetry-collector@sha256:6f1c53a611091402f0403b628554621591effc7cf88e94be1f9141be007d11c7
+    command: ["--config=/etc/otel-agent-config.yaml"]
+    volumes:
+      - ./otel-agent-config.yaml:/etc/otel-agent-config.yaml
+    depends_on:
+      - otel-collector
+  client:
+    command: ["/app/client"]
+    build:
+      context: ./src
+      args:
+        CMD: client
+    depends_on:
+      - otel-agent
+      - server
+  server:
+    command: ["/app/server"]
+    build:
+      context: ./src
+      args:
+        CMD: server
+    ports:
+      - "8080:8080"
+    depends_on:
+      - otel-agent
