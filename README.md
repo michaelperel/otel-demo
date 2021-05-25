@@ -12,6 +12,8 @@ In `docker-compose.yml` there are variety of services:
 * `otel-collector` - a service that receives traces forwarded from `otel-agent`
   and exports them to `jaeger` and `zipkin`
 
+![Architecture](./docs/architecture.png)
+
 # Why is this interesting?
 1. By using Open Telemetry with the collector, backends are swappable
    and all services handle tracing in the same way, regardless of programming
