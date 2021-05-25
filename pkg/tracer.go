@@ -1,4 +1,4 @@
-package tracer_provider
+package pkg
 
 import (
 	"context"
@@ -14,13 +14,15 @@ import (
 	"google.golang.org/grpc"
 )
 
-func Initialize(addr, serviceName string) func() {
+var tr = otel.Tracer("pkg")
+
+func InitializeGlobalTracer(agentURL, serviceName string) func() {
 	ctx := context.Background()
 
 	// Export all traces to otel agent
 	exp, err := otlp.NewExporter(ctx, otlpgrpc.NewDriver(
 		otlpgrpc.WithInsecure(),
-		otlpgrpc.WithEndpoint(addr),
+		otlpgrpc.WithEndpoint(agentURL),
 		otlpgrpc.WithDialOption(grpc.WithBlock()),
 	))
 	handleErr(err, "failed to create exporter")

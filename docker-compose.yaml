@@ -26,19 +26,41 @@ services:
   client:
     command: ["/app/client"]
     build:
-      context: ./src
+      context: .
       args:
         CMD: client
+    environment:
+      OTEL_AGENT_URL: ${OTEL_AGENT_URL?}
+      SERVER_URL: ${SERVER_URL?}
     depends_on:
       - otel-agent
       - server
   server:
     command: ["/app/server"]
     build:
-      context: ./src
+      context: .
       args:
         CMD: server
+    environment:
+      OTEL_AGENT_URL: ${OTEL_AGENT_URL?}
+      REDIS_URL: ${REDIS_URL?}
     ports:
       - "8080:8080"
     depends_on:
       - otel-agent
+      - redis
+      - worker
+  worker:
+    command: ["/app/worker"]
+    build:
+      context: .
+      args:
+        CMD: worker
+    environment:
+      OTEL_AGENT_URL: ${OTEL_AGENT_URL?}
+      REDIS_URL: ${REDIS_URL?}
+    depends_on:
+      - otel-agent
+      - redis
+  redis:
+    image: redis:latest
