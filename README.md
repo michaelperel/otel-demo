@@ -129,10 +129,14 @@ this point, you would no longer need agents or collectors. While initializing
 the tracer requires changes, the actual usage of the tracer thereafter will not
 change at all.
 
+Note that as of writing, an exporter library for Azure Monitor written in Go
+does not exist, but an exporter for the collector does. If we would like our
+Go services to export to Azure Monitor, we would be forced to use the collector.
+
 With serverless, this can be especially useful because it is often harder
 to deploy agents and collectors.
 
-# How to navigate the code?
+# Navigating the code
 Start by reading the comments in `cmd/client/client.go`.
 They describe how to create a trace that propagates to the server via
 an HTTP request.
@@ -153,6 +157,30 @@ can be manually injected and extracted, when publishing and receiving messages.
 
 Finally, read the comments in `pkg/tracer.go`. They describe boilerplate code
 that sets up a tracer provider for each application.
+
+# Navigating Open Telemetry repositories
+## Collector exporters
+Open Telemetry officially maintains support for exporters for popular open
+source backends such as Jaeger and Zipkin. Additionally, there are "contrib"
+repos where the open source community maintains exporters for other
+backends such as Azure Monitor or Data Dog.
+
+* [OTEL Collector Open Source Exporters](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter)
+* [OTEL Collector Contrib Exporters](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter)
+
+## Exporter libraries
+Open Telemetry has separate repos for each supported language. The URL typically
+looks like `https://github.com/open-telemetry/opentelemetry-<LANGUAGE NAME>`.
+
+For instance,
+[this is the repo for Java](https://github.com/open-telemetry/opentelemetry-java).
+
+Officially supported open source exporter libraries can be found in the
+language specific repos, typically in a directory called "exporters".
+
+Unofficial exporters are often scattered around Github, but are indexed by
+the [official registry](https://opentelemetry.io/registry/)
+where you can search for them.
 
 # Development
 A dev container has been provided. To use:
