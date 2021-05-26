@@ -1,18 +1,26 @@
 # What is this?
-This is a demo of Open Telemetry's distributed tracing capabilities.
-In `docker-compose.yml` there are variety of services:
+This is a demo of Open Telemetry's distributed tracing capabilities, using
+a dummy application described by this architecture diagram:
+
+![Architecture](./docs/architecture.png)
+
+> Note: The solid arrows describe how the services send all non-telemetry data
+  to each other (for instance, http requests). The dotted arrows describes the
+  flow of all telemetry data (traces).
+
+These depicted services can be found in `docker-compose.yml`:
 * `client` - a service that sends a few requests to the server
 * `server` - a service that implements an HTTP server and publishes a message
   per request via [redis' pubsub](https://redis.io/topics/pubsub)
 * `worker` - a service that listens for messages on redis' pubsub and
   does work when a message is published
+* `redis` - an open source key value store that is used for its
+  lightweight pubsub message broker capabilities
 * `jaeger` - an open source telemetry backend
 * `zipkin` - an open source telemetry backend
 * `otel-agent` - a service that receives traces from `server` and `client`
 * `otel-collector` - a service that receives traces forwarded from `otel-agent`
   and exports them to `jaeger` and `zipkin`
-
-![Architecture](./docs/architecture.png)
 
 # Why is this interesting?
 1. By using Open Telemetry with the collector, backends are swappable
@@ -67,6 +75,42 @@ Note that you can see all traces that started from the client. If you click on
 a trace, you can see the distributed spans that make up the trace:
 
 ![Spans](./docs/jaeger-span.png)
+
+# Advice for running in production
+## Do I *really* need agents/collectors?
+In my opinion, the answer is almost always no. Here are cases where I believe
+they are needed:
+  1. You would like to change the telemetry backend without redeploying your
+     application.
+  2. You would like to limit your points of egress. With the collector,
+     the only time where a network request would be made to a third party
+     would be when the collector sends traces to commercial backend,
+     such as Data Dog.
+
+Keep in mind the added complexity of using agents/collectors.
+
+Deploying an agent alongside every service introduces more configuration and
+requires more compute. It also increases the surface area for bugs.
+What if something goes wrong in the agent? If it is deployed as a sidecar,
+would it affect the main service?
+
+Managing a collector in a large application may actually mean managing a
+cluster of collectors behind a load balancer. This comes with the typical
+headaches of managing any cluster, including extra responsibility and cost.
+
+## How can I use Open Telemetry without agents/collectors?
+Determine if an exporter library for your desired backend(s) exist(s) that
+do not require agents/collectors exist by searching
+[the official registry](https://opentelemetry.io/registry/). When searching for
+"Azure Monitor" one of the first results links to
+[Azure Monitor exporter for python](https://github.com/microsoft/opentelemetry-azure-monitor-python).
+
+If this repo were written in python, to use the library, you would replace code
+for the agent exporter in `pkg/tracer` with the Azure Monitor exporter. You
+would no longer need agents or collectors.
+
+With serverless, this can be especially useful because it is often harder
+to deploy agents and collectors.
 
 # How to navigate the code?
 Start by reading the comments in `cmd/client/client.go`.
