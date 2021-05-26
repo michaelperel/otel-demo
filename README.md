@@ -9,26 +9,36 @@ a dummy application described by this architecture diagram:
   flow of all telemetry data (traces).
 
 These depicted services can be found in `docker-compose.yml`:
-* `client` - a service that sends a few requests to the server
-* `server` - a service that implements an HTTP server and publishes a message
-  per request via [redis' pubsub](https://redis.io/topics/pubsub)
-* `worker` - a service that listens for messages on redis' pubsub and
-  does work when a message is published
-* `redis` - an open source key value store that is used for its
-  lightweight pubsub message broker capabilities
-* `jaeger` - an open source telemetry backend
-* `zipkin` - an open source telemetry backend
-* `otel-agent` - a service that receives traces from `server` and `client`
-* `otel-collector` - a service that receives traces forwarded from `otel-agent`
-  and exports them to `jaeger` and `zipkin`
+* `client` - A service that sends a few requests to the server.
+* `server` - A service that implements an HTTP server and publishes a message
+  per request via [redis' pubsub](https://redis.io/topics/pubsub).
+* `worker` - A service that listens for messages on redis' pubsub and
+  does work when a message is published.
+* `redis` - An open source key value store that is used for its
+  lightweight pubsub message broker capabilities.
+* `jaeger` - An open source telemetry backend.
+* `zipkin` - An open source telemetry backend.
+* `otel-agent` - A service that receives traces from `server`, `client`, and `worker`.
+  In a real deployment, each service is expected to run an agent locally
+  that forwards telemetry data to the collector. It handles logic such as 
+  retries and batching, so you don't have to implement that in your code. It
+  can also enhance telemetry with additional metadata. The agent is actually
+  a local version of the collector.
+* `otel-collector` - A service that receives traces forwarded from `otel-agent`
+  and exports them to `jaeger` and `zipkin`. In a real deployment, this could
+  be running on another VM or scaled horizontally as a cluster behind a load
+  balancer, depending on desirable uptime.
 
 # Why is this interesting?
-1. By using Open Telemetry with the collector, backends are swappable
-   and all services handle tracing in the same way, regardless of programming
-   language.
+1. By using Open Telemetry with the collector, backends are swappable *without
+   having to redeploy your application or add any specific code about a
+   particular backend to your application* and all services handle tracing in
+   the same way, regardless of programming language.
 
    Specifically, applications send traces to the agent, which forwards them to
-   the collector, and the collector defines backends via exporters in yaml.
+   the collector, and the collector defines backends via exporters in yaml. To
+   swap backends, just change the configuration in yaml and redeploy the
+   collector without touching application code.
 
    Here we use 2 exporters, `jaeger` and `zipkin`, but there are many possible
    exporters including
@@ -36,8 +46,9 @@ These depicted services can be found in `docker-compose.yml`:
 
 2. Cloud architectures often use some form of a message broker to communicate
    long running operations. While HTTP is covered via docs, many messaging
-   systems use protocols that are not supported by the Open Telemetry SDK
-   (there are no helper functions that inject and extract spans for you).
+   systems use protocols that are not automaticcaly supported by the
+   Open Telemetry SDK (trace contexts are not injected and extracted for you
+   automatically, you must manually do so yourself).
    One such example would be redis' pubsub wire protocol. In this repo, we show
    how to add distributed tracing to any arbitrary messaging system.
 
@@ -92,22 +103,31 @@ Keep in mind the added complexity of using agents/collectors.
 Deploying an agent alongside every service introduces more configuration and
 requires more compute. It also increases the surface area for bugs.
 What if something goes wrong in the agent? If it is deployed as a sidecar,
-would it affect the main service?
+how would it affect the main service?
 
 Managing a collector in a large application may actually mean managing a
 cluster of collectors behind a load balancer. This comes with the typical
 headaches of managing any cluster, including extra responsibility and cost.
 
 ## How can I use Open Telemetry without agents/collectors?
-Determine if an exporter library for your desired backend(s) exist(s) that
-do not require agents/collectors exist by searching
-[the official registry](https://opentelemetry.io/registry/). When searching for
-"Azure Monitor" one of the first results links to
+There are exporters for the collector as well as exporter libraries for
+your application code that do not require the collector. However, if you use an
+exporter library in your application code, then that configuration will need to
+exist in all your services and you cannot change that configuration without
+redeploying your service.
+
+If this tradeoff works for you, search for an exporter library in
+[the official registry](https://opentelemetry.io/registry/).
+
+For instance, when searching for "Azure Monitor" one of the first results
+links to
 [Azure Monitor exporter for python](https://github.com/microsoft/opentelemetry-azure-monitor-python).
 
-If this repo were written in python, to use the library, you would replace code
-for the agent exporter in `pkg/tracer` with the Azure Monitor exporter. You
-would no longer need agents or collectors.
+If our demo were written in python, to use the library, you would replace code
+for initializing the tracer in `pkg/tracer` with the Azure Monitor exporter. At
+this point, you would no longer need agents or collectors. While initializing
+the tracer requires changes, the actual usage of the tracer thereafter will not
+change at all.
 
 With serverless, this can be especially useful because it is often harder
 to deploy agents and collectors.
