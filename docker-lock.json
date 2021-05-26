@@ -4,48 +4,68 @@
 			{
 				"name": "golang",
 				"tag": "latest",
-				"digest": "04b95d37ab61bd05b6f163383dbd54da4553be2b427b8980a72f778be4edec6b",
-				"dockerfile": "src/Dockerfile",
+				"digest": "6f0b0a314b158ff6caf8f12d7f6f3a966500ec6afb533e986eca7375e2f7560f",
+				"dockerfile": "Dockerfile",
 				"service": "client"
 			},
 			{
 				"name": "scratch",
 				"tag": "",
 				"digest": "",
-				"dockerfile": "src/Dockerfile",
+				"dockerfile": "Dockerfile",
 				"service": "client"
 			},
 			{
 				"name": "jaegertracing/all-in-one",
 				"tag": "latest",
-				"digest": "710ddea40c84ce01acdb9fdb4c0a76ac11990e425a666968a3ae360dabc4e15f",
+				"digest": "85a10441bd1271fff53d1d80e174567d41ab596c5e82f7034e20996c7b6f20d1",
 				"service": "jaeger"
 			},
 			{
 				"name": "otel/opentelemetry-collector",
 				"tag": "latest",
-				"digest": "6f1c53a611091402f0403b628554621591effc7cf88e94be1f9141be007d11c7",
+				"digest": "f6ac448b9de543830af942e1691e75fc082c709754bf9ac690e8c216cbb43a25",
 				"service": "otel-agent"
 			},
 			{
 				"name": "otel/opentelemetry-collector",
 				"tag": "latest",
-				"digest": "6f1c53a611091402f0403b628554621591effc7cf88e94be1f9141be007d11c7",
+				"digest": "f6ac448b9de543830af942e1691e75fc082c709754bf9ac690e8c216cbb43a25",
 				"service": "otel-collector"
+			},
+			{
+				"name": "redis",
+				"tag": "latest",
+				"digest": "365eddf64356169aa0cbfbeaf928eb80762de3cc364402e7653532bcec912973",
+				"service": "redis"
 			},
 			{
 				"name": "golang",
 				"tag": "latest",
-				"digest": "04b95d37ab61bd05b6f163383dbd54da4553be2b427b8980a72f778be4edec6b",
-				"dockerfile": "src/Dockerfile",
+				"digest": "6f0b0a314b158ff6caf8f12d7f6f3a966500ec6afb533e986eca7375e2f7560f",
+				"dockerfile": "Dockerfile",
 				"service": "server"
 			},
 			{
 				"name": "scratch",
 				"tag": "",
 				"digest": "",
-				"dockerfile": "src/Dockerfile",
+				"dockerfile": "Dockerfile",
 				"service": "server"
+			},
+			{
+				"name": "golang",
+				"tag": "latest",
+				"digest": "6f0b0a314b158ff6caf8f12d7f6f3a966500ec6afb533e986eca7375e2f7560f",
+				"dockerfile": "Dockerfile",
+				"service": "worker"
+			},
+			{
+				"name": "scratch",
+				"tag": "",
+				"digest": "",
+				"dockerfile": "Dockerfile",
+				"service": "worker"
 			},
 			{
 				"name": "openzipkin/zipkin",

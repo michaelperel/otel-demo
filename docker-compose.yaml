@@ -1,15 +1,15 @@
 version: "3"
 services:
   jaeger:
-    image: jaegertracing/all-in-one@sha256:710ddea40c84ce01acdb9fdb4c0a76ac11990e425a666968a3ae360dabc4e15f
+    image: jaegertracing/all-in-one:latest@sha256:85a10441bd1271fff53d1d80e174567d41ab596c5e82f7034e20996c7b6f20d1
     ports:
       - "16686:16686"
   zipkin:
-    image: openzipkin/zipkin@sha256:1ae0572be3d26fd9ab3fd2da5e8feaa0ca0078dbc31e2ddfb881b1a56bc332b1
+    image: openzipkin/zipkin:latest@sha256:1ae0572be3d26fd9ab3fd2da5e8feaa0ca0078dbc31e2ddfb881b1a56bc332b1
     ports:
       - "9411:9411"
   otel-collector:
-    image: otel/opentelemetry-collector@sha256:6f1c53a611091402f0403b628554621591effc7cf88e94be1f9141be007d11c7
+    image: otel/opentelemetry-collector:latest@sha256:f6ac448b9de543830af942e1691e75fc082c709754bf9ac690e8c216cbb43a25
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
@@ -17,7 +17,7 @@ services:
       - jaeger
       - zipkin
   otel-agent:
-    image: otel/opentelemetry-collector@sha256:6f1c53a611091402f0403b628554621591effc7cf88e94be1f9141be007d11c7
+    image: otel/opentelemetry-collector:latest@sha256:f6ac448b9de543830af942e1691e75fc082c709754bf9ac690e8c216cbb43a25
     command: ["--config=/etc/otel-agent-config.yaml"]
     volumes:
       - ./otel-agent-config.yaml:/etc/otel-agent-config.yaml
@@ -63,4 +63,4 @@ services:
       - otel-agent
       - redis
   redis:
-    image: redis:latest
+    image: redis:latest@sha256:365eddf64356169aa0cbfbeaf928eb80762de3cc364402e7653532bcec912973
